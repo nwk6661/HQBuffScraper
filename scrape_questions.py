@@ -73,7 +73,7 @@ def write_one_game(url):
         raise GameError
 
     # open the file to write to
-    f = codecs.open('questions.txt', 'w')
+    f = codecs.open('questions.txt', 'a')
 
     # loop through all the questions
     for q in questions:
@@ -104,7 +104,7 @@ def main():
     req = requests.get('http://hqbuff.com/')
     soup = BeautifulSoup(req.text, 'html5lib')
     # get all the games from hqbuff
-    links = soup.find_all("ul", {"class": "archive-list"})[1]
+    links = soup.find_all("ul", {"class": "list--archive"})[0]
     all_games = [link.get('href') for link in links.find_all('a')]
     # write the data for every question in the games to the file
     for link in all_games:
