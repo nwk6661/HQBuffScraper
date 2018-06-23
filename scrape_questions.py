@@ -3,6 +3,7 @@ import requests
 import codecs
 from bs4 import BeautifulSoup
 import json
+import os, sys
 
 
 class GameError(Exception):
@@ -60,7 +61,10 @@ def main():
     all_games = [link.get('href')[6:16] for link in links.find_all('a')]
 
     # open the file outside of the loop so we dont open and close the file many times
-    f = codecs.open('questions.txt', 'w', encoding='utf-8')
+    if len(sys.argv) == 2:
+        f = codecs.open('questions/questions.txt', 'w', encoding='utf-8')
+    else:
+        f = codecs.open('questions.txt', 'w', encoding='utf-8')
 
     # write the data for every question in the games to the file
     for link in all_games:
