@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup
 import json
 import os, sys
 
+# Make a top level dict for answer distributions
+answers = {1: 0, 2: 0, 3: 0}
+
 
 class GameError(Exception):
     def __init__(self, game="Game does not exist"):
@@ -51,6 +54,46 @@ def write_one_game(url, file):
                 continue
 
 
+def one_game_statistics(url):
+    """
+    Generates statistics for a game, such as answer distribution or savage questions
+    :param url: the url of the game we are writing (date format)
+    :return:
+    """
+
+    # global the dict to store answers across all games
+    global answers
+
+    url = "https://hqbuff.com/api/" + url
+
+    headers = {"user-agent": "questionScrape"}
+    req = requests.get(url, headers)
+    req.encoding = 'utf-8'
+
+    data = json.loads(req.text)
+    if len(data) == 0:
+        raise GameError
+
+    # loop through every game for the day
+    for game in data:
+        # we only care about the question key
+        for question in game['questions']:
+            answer_str = ""
+            correct = ""
+            title = question['text']
+            # loop through all answers, store the correct one
+            # keep track of the answer number (1,2,3)
+            ans_num = 1
+            for a in question['answers']:
+                answer_str += a['text'] + ","
+                if a['correct']:
+                    correct = a['text']
+                    # Add optional 'if' statement here#
+                    answers[ans_num] += 1
+                ans_num += 1
+            answer_str += correct
+
+
 def main():
     # set url
     req = requests.get('http://hqbuff.com/')
@@ -66,14 +109,25 @@ def main():
     else:
         f = codecs.open('questions.txt', 'w', encoding='utf-8')
 
+    # set this to true to use statistics mode
+    statistics = False
+
     # write the data for every question in the games to the file
     for link in all_games:
         try:
-            write_one_game(link, f)  # we must prepend the url
+            if statistics:
+                one_game_statistics(link)
+            else:
+                write_one_game(link, f)  # we must prepend the url
         except GameError:
             print(GameError(link))
 
     f.close()
+
+    # print answer distribution
+    if statistics:
+        print(answers)
+        print(sum(answers.values()))
 
 
 if __name__ == main():
