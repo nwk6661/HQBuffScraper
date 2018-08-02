@@ -21,7 +21,7 @@ def write_one_game(url, file):
     :param file: the file we are writing to
     :return:
     """
-    url = "https://hqbuff.com/api/" + url
+    url = "https://hqbuff.com/api/us/" + url
 
     headers = {"user-agent": "questionScrape"}
     req = requests.get(url, headers)
@@ -101,7 +101,7 @@ def main():
     # get all the games from hqbuff
     links = soup.find_all("ul", {"class": "list--archive"})[0]
     # slice the game urls to be in YYYY-MM-DD format
-    all_games = [link.get('href')[6:16] for link in links.find_all('a')]
+    all_games = [link.get('href')[9:19] for link in links.find_all('a')]
 
     # open the file outside of the loop so we dont open and close the file many times
     if len(sys.argv) == 2:
